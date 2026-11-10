@@ -157,7 +157,7 @@
 
   /**
    * rows : tableau d'objets {entête Excel: valeur}
-   * opts : { trigram, picName, existing (index), airports }
+   * opts : { trigram, picName, existing (index), airports, role: 'PIC' | 'SIC' | 'AUTO' }
    * Retourne [{ data: {col: val}, status, warnings: [] }]
    */
   function convert(rows, opts) {
@@ -219,7 +219,7 @@
       if (trig && cdb !== trig && opl !== trig) warn.push('Trigramme ' + trig + ' absent (CDB ' + cdb + ', OPL ' + opl + ')');
 
       var status = !ex ? 'nouveau' : (ex.planned ? 'remplace prévu' : 'doublon');
-      out.push({ data: d, nightLanding: nightLanding, pf: true, role: isSIC ? 'SIC' : 'PIC', cdb: cdb,
+      out.push({ data: d, nightLanding: nightLanding, pf: true, role: opts.role === 'PIC' || opts.role === 'SIC' ? opts.role : (isSIC ? 'SIC' : 'PIC'), cdb: cdb,
         picName: norm(opts.picName) || 'Self', status: status, warnings: warn });
     });
     return out;

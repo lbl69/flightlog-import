@@ -21,6 +21,10 @@
   .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
   button { font: inherit; font-weight:600; border:0; border-radius:10px; padding:12px 16px; cursor:pointer; background:var(--acc); color:#fff; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .seg button { background:transparent; color:var(--ink); border-radius:0; padding:9px 18px; font-size:14px; }
+  .seg button + button { border-left:1px solid var(--line); }
+  .seg button.on { background:var(--acc); color:#fff; }
   select { font: inherit; font-size:13px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:transparent; color:inherit; }
   button.ghost { background:transparent; color:var(--acc); border:1px solid var(--line); padding:8px 12px; font-size:13px; }
   button:disabled { opacity:.4; cursor:default; }
@@ -47,8 +51,13 @@
   <div class="card">
     <div class="row">
       <div><label for="trig">Trigramme</label><input type="text" id="trig" placeholder="BLC" autocomplete="off"></div>
-      <div><label for="name">PIC Name <span class="hint">(vols CDB)</span></label><input type="text" id="name" placeholder="NOM PRÉNOM" autocomplete="off"></div>
+      <div><label for="name">PIC Name <span class="hint">(vols PIC)</span></label><input type="text" id="name" placeholder="NOM PRÉNOM" autocomplete="off"></div>
     </div>
+    <label style="margin-top:12px">Fonction pour cet export</label>
+    <div class="seg" id="roleSeg">
+      <button type="button" data-v="PIC">PIC</button><button type="button" data-v="SIC">SIC</button><button type="button" data-v="AUTO">Auto</button>
+    </div>
+    <div class="hint" style="font-size:12px;margin-top:6px">Auto = PIC si ton trigramme est en colonne CDB, SIC s'il est en OPL. Modifiable ensuite vol par vol.</div>
   </div>
 
   <div class="grid2">
@@ -69,10 +78,6 @@
       <button class="ghost" id="allpf">Tout PF</button>
       <button class="ghost" id="alt">Alterner PF/PM</button>
       <button class="ghost" id="nopf">Tout PM</button>
-    </div>
-    <div class="actions" style="margin-bottom:10px">
-      <button class="ghost" id="allpic">Tout PIC</button>
-      <button class="ghost" id="allsic">Tout SIC</button>
     </div>
     <label class="toggle"><input type="checkbox" id="incdup"> Inclure les doublons (vols déjà réalisés dans FlightLog)</label>
     <div class="tablewrap" style="margin-top:10px"><table id="tbl"></table></div>
@@ -97,6 +102,15 @@
   function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
   $('trig').value = load('fl_trig'); $('name').value = load('fl_name');
+  var role = load('fl_role') || 'PIC';
+  function paintSeg() {
+    [].forEach.call(document.querySelectorAll('#roleSeg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === role); });
+  }
+  paintSeg();
+  $('roleSeg').addEventListener('click', function (e) {
+    var v = e.target.getAttribute('data-v'); if (!v) return;
+    role = v; store('fl_role', v); paintSeg(); run(true);
+  });
   ['trig', 'name'].forEach(function (id) {
     $(id).addEventListener('input', function () { store('fl_' + id, $(id).value.toUpperCase()); run(); });
   });
@@ -115,7 +129,7 @@
       var wb = XLSX.read(buf, { type: 'array' });
       var ws = wb.Sheets[wb.SheetNames[0]];
       rawRows = XLSX.utils.sheet_to_json(ws, { raw: true, defval: '' });
-      run();
+      items = []; run(true);
     }).catch(showErr);
   });
 
@@ -126,16 +140,16 @@
 
   function showErr(e) { $('err').textContent = e && e.message ? e.message : String(e); }
 
-  function run() {
+  function run(resetRole) {
     $('err').textContent = '';
     if (!rawRows) return;
     try {
       var prev = items.map(function (i) { return { pf: i.pf, role: i.role }; });
       items = FLConvert.convert(rawRows, {
         trigram: $('trig').value, picName: $('name').value.toUpperCase(),
-        existing: existing || {}, airports: AIRPORTS
+        existing: existing || {}, airports: AIRPORTS, role: role
       });
-      if (prev.length === items.length) items.forEach(function (it, i) { it.pf = prev[i].pf; it.role = prev[i].role; });
+      if (prev.length === items.length) items.forEach(function (it, i) { it.pf = prev[i].pf; if (!resetRole) it.role = prev[i].role; });
       render();
     } catch (e) { showErr(e); $('res').hidden = true; }
   }
@@ -175,9 +189,7 @@
     if (i != null) items[+i].pf = e.target.checked;
     if (r != null) items[+r].role = e.target.value;
   });
-  function setRole(v) { items.forEach(function (it) { it.role = v; }); render(); }
-  $('allpic').onclick = function () { setRole('PIC'); };
-  $('allsic').onclick = function () { setRole('SIC'); };
+
   $('incdup').addEventListener('change', render);
   function setPF(fn) { items.forEach(function (it, i) { it.pf = fn(i); }); render(); }
   $('allpf').onclick = function () { setPF(function () { return true; }); };
