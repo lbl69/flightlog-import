@@ -216,26 +216,25 @@
       d['Pax'] = norm(g(r, 'pax')).replace(/\.0+$/, '');
       d['Fuel'] = isNaN(conso) ? '' : (conso * LBS_TO_T).toFixed(2);
       d['Flight Number'] = vol;
-      if (isSIC) {
-        d['SIC Time'] = d['Total Block'];
-        d['PIC Name'] = cdb;
-        d['Function'] = 'SIC';
-      } else {
-        d['PIC Time'] = d['Total Block'];
-        d['PIC Name'] = norm(opts.picName) || 'Self';
-        d['Function'] = 'PIC';
-      }
       if (trig && cdb !== trig && opl !== trig) warn.push('Trigramme ' + trig + ' absent (CDB ' + cdb + ', OPL ' + opl + ')');
 
       var status = !ex ? 'nouveau' : (ex.planned ? 'remplace prévu' : 'doublon');
-      out.push({ data: d, nightLanding: nightLanding, pf: true, status: status, warnings: warn });
+      out.push({ data: d, nightLanding: nightLanding, pf: true, role: isSIC ? 'SIC' : 'PIC', cdb: cdb,
+        picName: norm(opts.picName) || 'Self', status: status, warnings: warn });
     });
     return out;
   }
 
-  // Applique le choix PF/PM sur décollages/atterrissages
+  // Applique les choix PIC/SIC et PF/PM
   function finalize(item) {
     var d = Object.assign({}, item.data);
+    if (item.role === 'SIC') {
+      d['PIC Time'] = ''; d['SIC Time'] = d['Total Block'];
+      d['PIC Name'] = item.cdb || ''; d['Function'] = 'SIC';
+    } else {
+      d['SIC Time'] = ''; d['PIC Time'] = d['Total Block'];
+      d['PIC Name'] = item.picName; d['Function'] = 'PIC';
+    }
     if (item.pf) {
       d['Takeoff'] = '1';
       d['Day Landing'] = item.nightLanding ? '' : '1';

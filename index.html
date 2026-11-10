@@ -21,6 +21,7 @@
   .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
   button { font: inherit; font-weight:600; border:0; border-radius:10px; padding:12px 16px; cursor:pointer; background:var(--acc); color:#fff; }
+  select { font: inherit; font-size:13px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:transparent; color:inherit; }
   button.ghost { background:transparent; color:var(--acc); border:1px solid var(--line); padding:8px 12px; font-size:13px; }
   button:disabled { opacity:.4; cursor:default; }
   .actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -68,6 +69,10 @@
       <button class="ghost" id="allpf">Tout PF</button>
       <button class="ghost" id="alt">Alterner PF/PM</button>
       <button class="ghost" id="nopf">Tout PM</button>
+    </div>
+    <div class="actions" style="margin-bottom:10px">
+      <button class="ghost" id="allpic">Tout PIC</button>
+      <button class="ghost" id="allsic">Tout SIC</button>
     </div>
     <label class="toggle"><input type="checkbox" id="incdup"> Inclure les doublons (vols déjà réalisés dans FlightLog)</label>
     <div class="tablewrap" style="margin-top:10px"><table id="tbl"></table></div>
@@ -125,12 +130,12 @@
     $('err').textContent = '';
     if (!rawRows) return;
     try {
-      var prevPF = items.map(function (i) { return i.pf; });
+      var prev = items.map(function (i) { return { pf: i.pf, role: i.role }; });
       items = FLConvert.convert(rawRows, {
         trigram: $('trig').value, picName: $('name').value.toUpperCase(),
         existing: existing || {}, airports: AIRPORTS
       });
-      items.forEach(function (it, i) { if (prevPF.length === items.length) it.pf = prevPF[i]; });
+      if (prev.length === items.length) items.forEach(function (it, i) { it.pf = prev[i].pf; it.role = prev[i].role; });
       render();
     } catch (e) { showErr(e); $('res').hidden = true; }
   }
@@ -157,7 +162,7 @@
       h += '<tr class="' + (off ? 'off' : '') + '"><td><input type="checkbox" data-i="' + i + '"' + (it.pf ? ' checked' : '') + '></td>' +
         '<td>' + d.Date + '</td><td>' + d['Flight Number'] + '</td><td>' + d.Registration + '</td>' +
         '<td>' + d.Departure + '–' + d.Arrival + '</td><td>' + d['Total Block'] + '</td><td>' + d['Total Flight'] + '</td>' +
-        '<td>' + (d['Night Time'] || '') + (it.nightLanding ? ' ☾' : '') + '</td><td>' + d.Fuel + '</td><td>' + d.Function + '</td>' +
+        '<td>' + (d['Night Time'] || '') + (it.nightLanding ? ' ☾' : '') + '</td><td>' + d.Fuel + '</td><td><select data-r="' + i + '"><option' + (it.role === 'PIC' ? ' selected' : '') + '>PIC</option><option' + (it.role === 'SIC' ? ' selected' : '') + '>SIC</option></select></td>' +
         (existing ? '<td><span class="tag ' + cls + '">' + it.status + '</span></td>' : '') + '</tr>';
       if (it.warnings.length) h += '<tr><td></td><td colspan="10" class="w">⚠ ' + it.warnings.join(' · ') + '</td></tr>';
     });
@@ -166,9 +171,13 @@
   }
 
   $('tbl').addEventListener('change', function (e) {
-    var i = e.target.getAttribute('data-i'); if (i == null) return;
-    items[+i].pf = e.target.checked;
+    var i = e.target.getAttribute('data-i'), r = e.target.getAttribute('data-r');
+    if (i != null) items[+i].pf = e.target.checked;
+    if (r != null) items[+r].role = e.target.value;
   });
+  function setRole(v) { items.forEach(function (it) { it.role = v; }); render(); }
+  $('allpic').onclick = function () { setRole('PIC'); };
+  $('allsic').onclick = function () { setRole('SIC'); };
   $('incdup').addEventListener('change', render);
   function setPF(fn) { items.forEach(function (it, i) { it.pf = fn(i); }); render(); }
   $('allpf').onclick = function () { setPF(function () { return true; }); };

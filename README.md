@@ -15,8 +15,10 @@ Tout est calculé localement dans le navigateur, aucun fichier n'est envoyé.
 | `Tpsblc/Tpsvol` | `Total Block/Total Flight` |
 | `Conso` (lbs) | `Fuel` (tonnes, 2 décimales) |
 | `Paxfret` | `Pax` |
-| Trigramme en `Cdb` | `PIC Time`, `PIC Name` = nom saisi, `Function` PIC |
-| Trigramme en `Opl` | `SIC Time`, `PIC Name` = trigramme CDB, `Function` SIC |
+| PIC | `PIC Time`, `PIC Name` = nom saisi, `Function` PIC |
+| SIC | `SIC Time`, `PIC Name` = trigramme du CDB, `Function` SIC |
+
+PIC/SIC est choisi vol par vol (ou « Tout PIC / Tout SIC »), pré-rempli d'après la position du trigramme dans les colonnes `Cdb`/`Opl`.
 
 - **Nuit** : règle EASA (soleil < −6°), minute par minute sur le temps bloc, position interpolée entre les terrains.
 - **Atterrissage jour/nuit** selon l'heure d'atterrissage ; PM = 0 décollage / 0 atterrissage.
