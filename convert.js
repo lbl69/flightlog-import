@@ -170,7 +170,7 @@
     if (missing.length) throw new Error('Colonnes introuvables dans l\'Excel : ' + missing.join(', '));
     function g(r, f) { return map[f] ? r[map[f]] : ''; }
 
-    var out = [];
+    var out = [], perDay = {};
     rows.forEach(function (r, i) {
       var date = toISODate(g(r, 'date'));
       if (!date) return; // ligne vide / total
@@ -219,7 +219,8 @@
       if (trig && cdb !== trig && opl !== trig) warn.push('Trigramme ' + trig + ' absent (CDB ' + cdb + ', OPL ' + opl + ')');
 
       var status = !ex ? 'nouveau' : (ex.planned ? 'remplace prévu' : 'doublon');
-      out.push({ data: d, nightLanding: nightLanding, pf: true, role: opts.role === 'PIC' || opts.role === 'SIC' ? opts.role : (isSIC ? 'SIC' : 'PIC'), cdb: cdb,
+      var nDay = perDay[date] = (perDay[date] || 0) + 1;   // 1er vol du jour PF, 2e PM, 3e PF...
+      out.push({ data: d, nightLanding: nightLanding, pf: nDay % 2 === 1, nDay: nDay, role: opts.role === 'PIC' || opts.role === 'SIC' ? opts.role : (isSIC ? 'SIC' : 'PIC'), cdb: cdb,
         picName: norm(opts.picName) || 'Self', status: status, warnings: warn });
     });
     return out;

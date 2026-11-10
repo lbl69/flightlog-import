@@ -21,7 +21,8 @@ Tout est calculé localement dans le navigateur, aucun fichier n'est envoyé.
 La fonction se choisit en haut de page pour tout l'export (**PIC**, **SIC** ou **Auto** d'après la position du trigramme dans `Cdb`/`Opl`), puis peut être corrigée vol par vol. Pour une période mixte (SIC puis PIC), faire deux exports.
 
 - **Nuit** : règle EASA (soleil < −6°), minute par minute sur le temps bloc, position interpolée entre les terrains.
-- **Atterrissage jour/nuit** selon l'heure d'atterrissage ; PM = 0 décollage / 0 atterrissage.
+- **PF par défaut un vol sur deux dans la journée** (1er, 3e… = 1 décollage + 1 atterrissage ; 2e, 4e… = PM, 0/0), modifiable vol par vol.
+- **Atterrissage jour/nuit** selon l'heure d'atterrissage.
 - **Distance** orthodromique en NM (coordonnées OurAirports, `airports.js`).
 - **Export FlightLog (facultatif)** : reprend `SchedOut/SchedIn` et classe chaque vol en *nouveau*, *remplace prévu* (vol planning sans immat) ou *doublon* (exclu par défaut).
 

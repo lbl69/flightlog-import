@@ -57,7 +57,7 @@
     <div class="seg" id="roleSeg">
       <button type="button" data-v="PIC">PIC</button><button type="button" data-v="SIC">SIC</button><button type="button" data-v="AUTO">Auto</button>
     </div>
-    <div class="hint" style="font-size:12px;margin-top:6px">Auto = PIC si ton trigramme est en colonne CDB, SIC s'il est en OPL. Modifiable ensuite vol par vol.</div>
+    <div class="hint" style="font-size:12px;margin-top:6px">Auto = PIC si ton trigramme est en colonne CDB, SIC s'il est en OPL. Modifiable ensuite vol par vol.<br>PF par défaut : 1 vol sur 2 dans la journée (1 décollage + 1 atterrissage), en commençant par le 1er.</div>
   </div>
 
   <div class="grid2">
@@ -76,7 +76,7 @@
     <p class="stats" id="stats"></p>
     <div class="actions" style="margin-bottom:10px">
       <button class="ghost" id="allpf">Tout PF</button>
-      <button class="ghost" id="alt">Alterner PF/PM</button>
+      <button class="ghost" id="alt">1 vol sur 2 / jour</button>
       <button class="ghost" id="nopf">Tout PM</button>
     </div>
     <label class="toggle"><input type="checkbox" id="incdup"> Inclure les doublons (vols déjà réalisés dans FlightLog)</label>
@@ -194,7 +194,7 @@
   function setPF(fn) { items.forEach(function (it, i) { it.pf = fn(i); }); render(); }
   $('allpf').onclick = function () { setPF(function () { return true; }); };
   $('nopf').onclick = function () { setPF(function () { return false; }); };
-  $('alt').onclick = function () { setPF(function (i) { return i % 2 === 0; }); };
+  $('alt').onclick = function () { setPF(function (i) { return items[i].nDay % 2 === 1; }); };
 
   function buildFile() {
     var sel = selected();
