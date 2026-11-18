@@ -239,7 +239,7 @@
     }
     if (item.sim) {
       // Simulateur F-SIMU -> FR2108 : temps en Sim Time uniquement
-      d['Rules'] = 'SIM'; d['IFR Time'] = '';
+      d['Rules'] = ''; d['IFR Time'] = '';
       d['Sim Time'] = d['Total Block'];
       d['PIC Time'] = ''; d['SIC Time'] = '';
       d['Night Time'] = ''; d['Distance'] = '';

@@ -23,7 +23,7 @@ La fonction se choisit en haut de page pour tout l'export (**PIC**, **SIC** ou *
 - **Nuit** : règle EASA (soleil < −6°), minute par minute sur le temps bloc, position interpolée entre les terrains.
 - **PF par défaut un vol sur deux dans la journée** (1er, 3e… = 1 décollage + 1 atterrissage ; 2e, 4e… = PM, 0/0), modifiable vol par vol.
 - **Nature du vol** : colonne `Rules` (IFR par défaut, VFR au choix) et `IFR Time` = temps bloc si IFR. À mapper une fois dans l'écran d'import CSV de FlightLog (mapping mémorisé).
-- **Simulateur** : immat `F-SIMU` → `FR2108`, `Rules` = SIM, temps bloc en `Sim Time` (pas de PIC/SIC/IFR/nuit).
+- **Simulateur** : immat `F-SIMU` → `FR2108`, temps bloc en `Sim Time` (pas de PIC/SIC/IFR/nuit).
 - **Atterrissage jour/nuit** selon l'heure d'atterrissage.
 - **Distance** orthodromique en NM (coordonnées OurAirports, `airports.js`).
 - **Export FlightLog (facultatif)** : reprend `SchedOut/SchedIn` et classe chaque vol en *nouveau*, *remplace prévu* (vol planning sans immat) ou *doublon* (exclu par défaut).
