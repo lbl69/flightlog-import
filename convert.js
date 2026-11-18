@@ -5,7 +5,7 @@
   var COLS = ['Date', 'Registration', 'Departure', 'Arrival', 'SchedOut', 'SchedIn', 'Out', 'In', 'Off', 'On',
     'Takeoff', 'Day Landing', 'Night Landing', 'Approaches', 'Total Block', 'Total Flight', 'Night Time',
     'Distance', 'Pax', 'Payload', 'Fuel', 'Fuel Prev', 'Flight Number', 'PIC Time', 'SIC Time', 'DUAL Time',
-    'INS Time', 'Sim Time', 'PIC Name', 'Notes', 'Function'];
+    'INS Time', 'Sim Time', 'PIC Name', 'Notes', 'Function', 'Rules', 'IFR Time'];
 
   var LBS_TO_T = 0.45359237 / 1000;
 
@@ -221,7 +221,7 @@
       var status = !ex ? 'nouveau' : (ex.planned ? 'remplace prévu' : 'doublon');
       var nDay = perDay[date] = (perDay[date] || 0) + 1;   // 1er vol du jour PF, 2e PM, 3e PF...
       out.push({ data: d, nightLanding: nightLanding, pf: nDay % 2 === 1, nDay: nDay, role: opts.role === 'PIC' || opts.role === 'SIC' ? opts.role : (isSIC ? 'SIC' : 'PIC'), cdb: cdb,
-        picName: norm(opts.picName) || 'Self', status: status, warnings: warn });
+        picName: norm(opts.picName) || 'Self', rules: opts.rules === 'VFR' ? 'VFR' : 'IFR', status: status, warnings: warn });
     });
     return out;
   }
@@ -236,6 +236,8 @@
       d['SIC Time'] = ''; d['PIC Time'] = d['Total Block'];
       d['PIC Name'] = item.picName; d['Function'] = 'PIC';
     }
+    d['Rules'] = item.rules || 'IFR';
+    d['IFR Time'] = d['Rules'] === 'IFR' ? d['Total Block'] : '';
     if (item.pf) {
       d['Takeoff'] = '1';
       d['Day Landing'] = item.nightLanding ? '' : '1';

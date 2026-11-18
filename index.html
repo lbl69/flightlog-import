@@ -57,6 +57,10 @@
     <div class="seg" id="roleSeg">
       <button type="button" data-v="PIC">PIC</button><button type="button" data-v="SIC">SIC</button><button type="button" data-v="AUTO">Auto</button>
     </div>
+    <label style="margin-top:12px">Nature du vol</label>
+    <div class="seg" id="rulesSeg">
+      <button type="button" data-v="IFR">IFR</button><button type="button" data-v="VFR">VFR</button>
+    </div>
     <div class="hint" style="font-size:12px;margin-top:6px">Auto = PIC si ton trigramme est en colonne CDB, SIC s'il est en OPL. Modifiable ensuite vol par vol.<br>PF par défaut : 1 vol sur 2 dans la journée (1 décollage + 1 atterrissage), en commençant par le 1er.</div>
   </div>
 
@@ -88,7 +92,7 @@
   </div>
 
   <p class="err" id="err"></p>
-  <footer>Conso lbs → t · Nuit EASA (soleil &lt; −6°) · Distance orthodromique NM · Heures UTC</footer>
+  <footer>Colonnes « Rules » (IFR/VFR) et « IFR Time » à mapper à l'import FlightLog · Conso lbs → t · Nuit EASA (soleil &lt; −6°) · Distance orthodromique NM · Heures UTC</footer>
 </main>
 
 <script src="xlsx.full.min.js"></script>
@@ -107,6 +111,15 @@
     [].forEach.call(document.querySelectorAll('#roleSeg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === role); });
   }
   paintSeg();
+  var rules = load('fl_rules') || 'IFR';
+  function paintRules() {
+    [].forEach.call(document.querySelectorAll('#rulesSeg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === rules); });
+  }
+  paintRules();
+  $('rulesSeg').addEventListener('click', function (e) {
+    var v = e.target.getAttribute('data-v'); if (!v) return;
+    rules = v; store('fl_rules', v); paintRules(); run();
+  });
   $('roleSeg').addEventListener('click', function (e) {
     var v = e.target.getAttribute('data-v'); if (!v) return;
     role = v; store('fl_role', v); paintSeg(); run(true);
@@ -147,7 +160,7 @@
       var prev = items.map(function (i) { return { pf: i.pf, role: i.role }; });
       items = FLConvert.convert(rawRows, {
         trigram: $('trig').value, picName: $('name').value.toUpperCase(),
-        existing: existing || {}, airports: AIRPORTS, role: role
+        existing: existing || {}, airports: AIRPORTS, role: role, rules: rules
       });
       if (prev.length === items.length) items.forEach(function (it, i) { it.pf = prev[i].pf; if (!resetRole) it.role = prev[i].role; });
       render();
