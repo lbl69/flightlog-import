@@ -203,7 +203,8 @@
       var d = {};
       COLS.forEach(function (c) { d[c] = ''; });
       d['Date'] = date;
-      d['Registration'] = registration(g(r, 'imm'));
+      var isSim = norm(g(r, 'imm')).toUpperCase().replace(/[\s-]/g, '') === 'FSIMU';
+      d['Registration'] = isSim ? 'FR2108' : registration(g(r, 'imm'));
       d['Departure'] = dep; d['Arrival'] = arr;
       d['Out'] = o != null ? fmtHM(o) : ''; d['In'] = inn != null ? fmtHM(inn) : '';
       d['Off'] = off != null ? fmtHM(off) : ''; d['On'] = on != null ? fmtHM(on) : '';
@@ -221,7 +222,7 @@
       var status = !ex ? 'nouveau' : (ex.planned ? 'remplace prévu' : 'doublon');
       var nDay = perDay[date] = (perDay[date] || 0) + 1;   // 1er vol du jour PF, 2e PM, 3e PF...
       out.push({ data: d, nightLanding: nightLanding, pf: nDay % 2 === 1, nDay: nDay, role: opts.role === 'PIC' || opts.role === 'SIC' ? opts.role : (isSIC ? 'SIC' : 'PIC'), cdb: cdb,
-        picName: norm(opts.picName) || 'Self', rules: opts.rules === 'VFR' ? 'VFR' : 'IFR', status: status, warnings: warn });
+        picName: norm(opts.picName) || 'Self', rules: opts.rules === 'VFR' ? 'VFR' : 'IFR', sim: isSim, status: status, warnings: warn });
     });
     return out;
   }
@@ -236,8 +237,16 @@
       d['SIC Time'] = ''; d['PIC Time'] = d['Total Block'];
       d['PIC Name'] = item.picName; d['Function'] = 'PIC';
     }
-    d['Rules'] = item.rules || 'IFR';
-    d['IFR Time'] = d['Rules'] === 'IFR' ? d['Total Block'] : '';
+    if (item.sim) {
+      // Simulateur F-SIMU -> FR2108 : temps en Sim Time uniquement
+      d['Rules'] = 'SIM'; d['IFR Time'] = '';
+      d['Sim Time'] = d['Total Block'];
+      d['PIC Time'] = ''; d['SIC Time'] = '';
+      d['Night Time'] = ''; d['Distance'] = '';
+    } else {
+      d['Rules'] = item.rules || 'IFR';
+      d['IFR Time'] = d['Rules'] === 'IFR' ? d['Total Block'] : '';
+    }
     if (item.pf) {
       d['Takeoff'] = '1';
       d['Day Landing'] = item.nightLanding ? '' : '1';

@@ -187,7 +187,7 @@
       var d = it.data, off = !$('incdup').checked && it.status === 'doublon';
       var cls = it.status === 'nouveau' ? 's-nouveau' : it.status === 'doublon' ? 's-doublon' : 's-remplace';
       h += '<tr class="' + (off ? 'off' : '') + '"><td><input type="checkbox" data-i="' + i + '"' + (it.pf ? ' checked' : '') + '></td>' +
-        '<td>' + d.Date + '</td><td>' + d['Flight Number'] + '</td><td>' + d.Registration + '</td>' +
+        '<td>' + d.Date + '</td><td>' + d['Flight Number'] + '</td><td>' + d.Registration + (it.sim ? ' <span class="tag">SIM</span>' : '') + '</td>' +
         '<td>' + d.Departure + '–' + d.Arrival + '</td><td>' + d['Total Block'] + '</td><td>' + d['Total Flight'] + '</td>' +
         '<td>' + (d['Night Time'] || '') + (it.nightLanding ? ' ☾' : '') + '</td><td>' + d.Fuel + '</td><td><select data-r="' + i + '"><option' + (it.role === 'PIC' ? ' selected' : '') + '>PIC</option><option' + (it.role === 'SIC' ? ' selected' : '') + '>SIC</option></select></td>' +
         (existing ? '<td><span class="tag ' + cls + '">' + it.status + '</span></td>' : '') + '</tr>';
